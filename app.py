@@ -8,9 +8,30 @@ def save_caption(folder, post):
     (folder / 'caption.txt').write_text(post.caption or '', encoding='utf-8')
 
 
+def get_output_folder():
+    """
+    Codespace + cloud drive 사용을 위한 저장 위치 설정.
+
+    기본값:
+        ./downloads
+
+    Google Drive, OneDrive, Dropbox 등 동기화 폴더를
+    OUTPUT_DIR 환경변수로 지정하면 해당 위치에 저장됩니다.
+
+    예:
+        export OUTPUT_DIR=/workspaces/drive/InstagramBackup
+    """
+    return Path(os.getenv('OUTPUT_DIR', 'downloads')).expanduser()
+
+
 def main():
     target = input('Instagram URL or username: ').strip().replace('@','')
-    out = Path('downloads')
+
+    out = get_output_folder()
+    out.mkdir(parents=True, exist_ok=True)
+
+    print(f'저장 위치: {out.resolve()}')
+
     loader = instaloader.Instaloader(
         dirname_pattern=str(out / '{profile}' / '{date_utc:%Y-%m-%d}_{shortcode}'),
         filename_pattern='{shortcode}',
