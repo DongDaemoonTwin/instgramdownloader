@@ -2,6 +2,7 @@ import os
 import time
 import zipfile
 from pathlib import Path
+from itertools import islice
 
 import instaloader
 
@@ -66,9 +67,14 @@ def main():
             loader.download_post(post, target=post.owner_username)
             save_caption(out / post.owner_username / f'{post.date_utc:%Y-%m-%d}_{post.shortcode}', post)
         else:
+            limit_input = input('다운로드할 게시물 개수 (기본 10개): ').strip()
+            limit = int(limit_input) if limit_input else 10
+
             profile = instaloader.Profile.from_username(loader.context, target)
-            for i, post in enumerate(profile.get_posts(), 1):
-                print(f'[{i}] {post.shortcode}')
+            posts = islice(profile.get_posts(), limit)
+
+            for i, post in enumerate(posts, 1):
+                print(f'[{i}/{limit}] {post.shortcode}')
                 loader.download_post(post, target=target)
                 save_caption(out / target / f'{post.date_utc:%Y-%m-%d}_{post.shortcode}', post)
                 time.sleep(5)
